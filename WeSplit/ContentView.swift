@@ -15,21 +15,27 @@ struct ContentView: View {
     
     let tipPercentages = [10, 15, 20, 25, 0]
     
+    var grandTotal: Double {
+        let tipSelection = Double(tipPercentage)
+        let tipValue = checkAmount / 100 * tipSelection
+        return checkAmount + tipValue
+    }
     var totalPerPerson: Double {
         // Calculate total per person
         let actualPeople = numberOfPeople + 2 // This is required because the numberOfPeople variable is a selection which starts from 0
-        let tipSelection = Double(tipPercentage)
         
-        let tipValue = checkAmount / 100 * tipSelection
-        let grandTotal = checkAmount + tipValue
         return grandTotal / Double(actualPeople)
+    }
+    
+    var currenyCode: FloatingPointFormatStyle<Double>.Currency {
+        .currency(code: Locale.current.currency?.identifier ?? "USD")
     }
     
     var body: some View {
         NavigationView {
             Form {
                 Section {
-                    TextField("Amount", value: $checkAmount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                    TextField("Amount", value: $checkAmount, format: currenyCode)
                         .keyboardType(.decimalPad)
                         .focused($amountIsFocused)
                     Picker("Number of people", selection: $numberOfPeople) {
@@ -44,17 +50,23 @@ struct ContentView: View {
                 
                 Section {
                     Picker("Tip percentage", selection: $tipPercentage) {
-                        ForEach(tipPercentages, id: \.self) {
+                        ForEach(0..<101, id: \.self) {
                             Text($0, format: .percent)
                         }
                     }
-                    .pickerStyle(.segmented)
+                    .pickerStyle(.menu)
                 } header: {
                     Text("Tip percentage")
                 }
                 
                 Section {
-                    Text(totalPerPerson, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                    Text(grandTotal, format: currenyCode)
+                } header: {
+                    Text("Grand Total")
+                }
+                
+                Section {
+                    Text(totalPerPerson, format: currenyCode)
                 } header: {
                     Text("Each person pays")
                 }
